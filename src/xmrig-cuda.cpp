@@ -200,13 +200,13 @@ bool rxHash(nvid_ctx *ctx, uint32_t startNonce, uint64_t target, uint32_t *resco
             RandomX_Keva::hash(ctx, startNonce, target, rescount, resnonce, ctx->rx_batch_size);
             break;
 
-        case Algorithm::RX_XLA:
-            throw std::runtime_error(kUnsupportedAlgorithm);
-            //RandomX_DefyX::hash(ctx, startNonce, target, rescount, resnonce, ctx->rx_batch_size);
-
         case Algorithm::RX_GRAFT:
             RandomX_Graft::hash(ctx, startNonce, target, rescount, resnonce, ctx->rx_batch_size);
             break;
+
+        case Algorithm::RX_XLA:
+            //RandomX_Panthera::hash(ctx, startNonce, target, rescount, resnonce, ctx->rx_batch_size);
+            //break;
 
         default:
             throw std::runtime_error(kUnsupportedAlgorithm);
@@ -231,11 +231,7 @@ bool rxPrepare(nvid_ctx *ctx, const void *dataset, size_t datasetSize, bool, uin
     resetError(ctx->device_id);
 
     try {
-#       ifdef XMRIG_ALGO_RANDOMX
         randomx_prepare(ctx, ctx->rx_dataset_host > 0 ? datasetHost.reg(dataset, datasetSize) : dataset, datasetSize, batchSize);
-#       else
-        throw std::runtime_error(kUnsupportedAlgorithm);
-#       endif
     }
     catch (std::exception &ex) {
         return saveError(ctx->device_id, ex);
@@ -284,11 +280,7 @@ bool astroBWTPrepare(nvid_ctx *ctx, uint32_t batchSize)
     resetError(ctx->device_id);
 
     try {
-#       ifdef XMRIG_ALGO_ASTROBWT
         astrobwt_prepare(ctx, batchSize);
-#       else
-        throw std::runtime_error(kUnsupportedAlgorithm);
-#       endif
     }
     catch (std::exception &ex) {
         return saveError(ctx->device_id, ex);
@@ -337,11 +329,7 @@ bool kawPowPrepare_v2(nvid_ctx *ctx, const void* cache, size_t cache_size, const
     resetError(ctx->device_id);
 
     try {
-#       ifdef XMRIG_ALGO_KAWPOW
         kawpow_prepare(ctx, cache, cache_size, dag_precalc, dag_size, height, dag_sizes);
-#       else
-        throw std::runtime_error(kUnsupportedAlgorithm);
-#       endif
     }
     catch (std::exception &ex) {
         return saveError(ctx->device_id, ex);
@@ -360,11 +348,7 @@ bool kawPowStopHash(nvid_ctx *ctx)
 
 #   ifdef XMRIG_ALGO_KAWPOW
     try {
-#       ifdef XMRIG_ALGO_KAWPOW
         kawpow_stop_hash(ctx);
-#       else
-        throw std::runtime_error(kUnsupportedAlgorithm);
-#       endif
     }
     catch (std::exception &ex) {
         return saveError(ctx->device_id, ex);
@@ -611,7 +595,7 @@ void release(nvid_ctx *ctx)
     cudaFree(ctx->astrobwt_offsets_begin);
     cudaFree(ctx->astrobwt_offsets_end);
 
-#   ifdef WITH_KAWPOW
+#   ifdef XMRIG_ALGO_KAWPOW
     cudaFree(ctx->kawpow_cache);
     cudaFree(ctx->kawpow_dag);
     cudaFreeHost(ctx->kawpow_stop_host);

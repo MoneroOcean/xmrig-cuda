@@ -79,7 +79,9 @@ static inline void compat_usleep(int waitTime)
 #include "cuda_device.hpp"
 #include "cuda_fast_int_math_v2.hpp"
 #include "cuda_fast_div_heavy.hpp"
+#ifdef XMRIG_ALGO_CN_GPU
 #include "cuda_cryptonight_gpu.hpp"
+#endif
 
 #if defined(__x86_64__) || defined(_M_AMD64) || defined(__LP64__)
 #   define _ASM_PTR_ "l"
@@ -508,7 +510,7 @@ __global__ void cryptonight_core_gpu_phase2_quad(
 
     float conc_var;
     if (ALGO == Algorithm::CN_CCX) {
-        conc_var = (partidx != 0) ? int_as_float(*(d_ctx_b + threads * 4 + thread * 4 + sub)) : 0.0f;
+        conc_var = (partidx != 0) ? __int_as_float(*(d_ctx_b + threads * 4 + thread * 4 + sub)) : 0.0f;
     }
 
     #pragma unroll 2
@@ -546,9 +548,9 @@ __global__ void cryptonight_core_gpu_phase2_quad(
                 uint32_t x_0 = loadGlobal32<uint32_t>(long_state + j);
 
                 if (ALGO == Algorithm::CN_CCX) {
-                    float r = int2float((int32_t)x_0) + conc_var;
-                    r = int_as_float((float_as_int(r * r * r) & 0x807FFFFF) | 0x40000000);
-                    x_0 ^= (int32_t)(int_as_float((float_as_int(conc_var) & 0x807FFFFF) | 0x40000000) * 536870880.0f);
+                    float r = __int2float_rn((int32_t)x_0) + conc_var;
+                    r = __int_as_float((__float_as_int(r * r * r) & 0x807FFFFF) | 0x40000000);
+                    x_0 ^= (int32_t)(__int_as_float((__float_as_int(conc_var) & 0x807FFFFF) | 0x40000000) * 536870880.0f);
                     conc_var += r;
                 }
 
@@ -639,7 +641,7 @@ __global__ void cryptonight_core_gpu_phase2_quad(
             }
         }
         if (ALGO == Algorithm::CN_CCX) {
-            *(d_ctx_b + threads * 4 + thread * 4 + sub) = float_as_int(conc_var);
+            *(d_ctx_b + threads * 4 + thread * 4 + sub) = __float_as_int(conc_var);
         }
     }
 }
@@ -818,6 +820,7 @@ void cryptonight_core_gpu_hash(nvid_ctx* ctx, uint32_t nonce)
 }
 
 
+#ifdef XMRIG_ALGO_CN_GPU
 template<xmrig_cuda::Algorithm::Id ALGO>
 void cryptonight_core_gpu_hash_gpu(nvid_ctx* ctx, uint32_t nonce)
 {
@@ -883,6 +886,7 @@ void cryptonight_core_gpu_hash_gpu(nvid_ctx* ctx, uint32_t nonce)
             ctx->d_ctx_state, ctx->d_ctx_key2 ));
     }
 }
+#endif
 
 void cryptonight_gpu_hash(nvid_ctx *ctx, const xmrig_cuda::Algorithm &algorithm, uint64_t height, uint32_t startNonce)
 {
@@ -962,9 +966,11 @@ void cryptonight_gpu_hash(nvid_ctx *ctx, const xmrig_cuda::Algorithm &algorithm,
             cryptonight_core_gpu_hash<Algorithm::CN_CCX>(ctx, startNonce);
             break;
 
+#       ifdef XMRIG_ALGO_CN_GPU
         case Algorithm::CN_GPU:
             cryptonight_core_gpu_hash_gpu<Algorithm::CN_GPU>(ctx, startNonce);
             break;
+#       endif
 
         default:
             break;
@@ -980,9 +986,11 @@ void cryptonight_gpu_hash(nvid_ctx *ctx, const xmrig_cuda::Algorithm &algorithm,
             cryptonight_core_gpu_hash<Algorithm::CN_LITE_1>(ctx, startNonce);
             break;
 
+#       ifdef XMRIG_ALGO_CN_GPU
         case Algorithm::CN_GPU:
             cryptonight_core_gpu_hash_gpu<Algorithm::CN_GPU>(ctx, startNonce);
             break;
+#       endif
 
         default:
             break;

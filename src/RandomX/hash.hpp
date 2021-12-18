@@ -39,9 +39,13 @@ void hash(nvid_ctx *ctx, uint32_t nonce, uint64_t target, uint32_t *rescount, ui
 //        CUDA_CHECK_KERNEL(ctx->device_id, sipesh<<<batch_size / 32, 32>>>(ctx->d_rx_hashes, ctx->d_input, ctx->inputlen, nonce));
 //        k12(input, inputSize, tempHash);
 //        CUDA_CHECK_KERNEL(ctx->device_id, k12<<<batch_size / 32, 32>>>(ctx->d_rx_hashes, ctx->d_input, ctx->inputlen, nonce));
-    } else {
-        CUDA_CHECK_KERNEL(ctx->device_id, blake2b_initial_hash<<<batch_size / 32, 32>>>(ctx->d_rx_hashes, ctx->d_input, ctx->inputlen, nonce));
-    }
+//=======
+//        rx_blake2b_wrapper::run(out, outlen, in, inlen);
+//        yespower_params_t params = { YESPOWER_1_0, 2048, 8, NULL };
+//        if (yespower_tls((const uint8_t *)out, outlen, &params, (yespower_binary_t *)out)) return -1;
+//        return KangarooTwelve((const unsigned char *)out, outlen, (unsigned char *)out, 32, 0, 0);
+    } else
+    CUDA_CHECK_KERNEL(ctx->device_id, blake2b_initial_hash<<<batch_size / 32, 32>>>(ctx->d_rx_hashes, ctx->d_input, ctx->inputlen, nonce));
     CUDA_CHECK_KERNEL(ctx->device_id, fillAes1Rx4<RANDOMX_SCRATCHPAD_L3, false, 64><<<batch_size / 32, 32 * 4>>>(ctx->d_rx_hashes, ctx->d_long_state, batch_size));
     CUDA_CHECK(ctx->device_id, cudaMemset(ctx->d_rx_rounding, 0, batch_size * sizeof(uint32_t)));
 

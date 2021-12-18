@@ -8,7 +8,7 @@ Main reasons why this plugin is separated project is:
 
 ## Windows usage
 
-* [Download](https://github.com/xmrig/xmrig-cuda/releases) plugin, you must choose CUDA version, usually it recent version (CUDA 10.1), but builds with older CUDA version also provided, alternative you can build the plugin from source (requiring GCC 9).
+* [Download](https://github.com/MoneroOcean/xmrig-cuda/releases) plugin, you must choose CUDA version, usually it recent version (CUDA 10.1), but builds with older CUDA version also provided, alternative you can build the plugin from source (requiring GCC 9).
 * Place **`xmrig-cuda.dll`** and other dll files near to **`xmrig.exe`**.
 * Edit **`config.json`** to enable CUDA support.
 ```

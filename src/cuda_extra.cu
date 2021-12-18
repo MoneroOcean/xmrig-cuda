@@ -286,11 +286,10 @@ __global__ void cryptonight_extra_gpu_final( int threads, uint64_t target, uint3
 }
 
 
+#ifdef XMRIG_ALGO_CN_GPU
 template<xmrig_cuda::Algorithm::Id ALGO>
 __global__ void cryptonight_gpu_extra_gpu_final( int threads, uint64_t target, uint32_t* __restrict__ d_res_count, uint32_t * __restrict__ d_res_nonce, uint32_t * __restrict__ d_ctx_state,uint32_t * __restrict__ d_ctx_key2 )
 {
-    using namespace xmrig_cuda;
-
     const int thread = blockDim.x * blockIdx.x + threadIdx.x;
 
     __shared__ uint32_t sharedMemory[1024];
@@ -334,6 +333,7 @@ __global__ void cryptonight_gpu_extra_gpu_final( int threads, uint64_t target, u
             d_res_nonce[idx] = thread;
     }
 }
+#endif
 
 void cryptonight_extra_cpu_set_data(nvid_ctx *ctx, const void *data, size_t len)
 {
@@ -481,13 +481,13 @@ void cryptonight_extra_cpu_final(nvid_ctx *ctx, uint32_t startNonce, uint64_t ta
 
     if (algorithm.family() == Algorithm::CN_HEAVY) {
         CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_final<Algorithm::CN_HEAVY_0><<<grid, block >>>( wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state,ctx->d_ctx_key2 ));
+#   ifdef XMRIG_ALGO_CN_GPU
+    } else if (algorithm == Algorithm::CN_GPU) {
+        CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_gpu_extra_gpu_final<Algorithm::CN_GPU> << <grid, block >> > (wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state, ctx->d_ctx_key2));
+#   endif
     } else {
-        if (algorithm == Algorithm::CN_GPU) {
-            CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_gpu_extra_gpu_final<Algorithm::CN_GPU> << <grid, block >> > (wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state, ctx->d_ctx_key2));
-        } else {
-            // fallback for all other algorithms
-            CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_final<Algorithm::CN_0> << <grid, block >> > (wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state, ctx->d_ctx_key2));
-        }
+        // fallback for all other algorithms
+        CUDA_CHECK_KERNEL(ctx->device_id, cryptonight_extra_gpu_final<Algorithm::CN_0> << <grid, block >> > (wsize, target, ctx->d_result_count, ctx->d_result_nonce, ctx->d_ctx_state, ctx->d_ctx_key2));
     }
 
     CUDA_CHECK(ctx->device_id, cudaDeviceSynchronize());
@@ -620,7 +620,7 @@ int cuda_get_deviceinfo(nvid_ctx *ctx)
         // Leave memory for 2080 MB dataset + 64 MB free
         // Each thread uses 1 scratchpad plus a few small buffers on GPU
         const size_t dataset_size = 2080u << 20;
-        const size_t max_blocks = (freeMemory - (ctx->rx_dataset_host ? 0 : dataset_size) - (64u << 20)) / (ctx->algorithm.l3() + 32768) / 32;
+        const int max_blocks = (freeMemory - (ctx->rx_dataset_host ? 0 : dataset_size) - (64u << 20)) / (ctx->algorithm.l3() + 32768) / 32;
         if (ctx->device_blocks > max_blocks) {
             ctx->device_blocks = max_blocks;
         }
@@ -730,6 +730,7 @@ int cuda_get_deviceinfo(nvid_ctx *ctx)
             }
         }
 
+#       ifdef XMRIG_ALGO_CN_GPU
         if (ctx->algorithm == Algorithm::CN_GPU && props.major < 7) {
             int t = 32;
             int b = ctx->device_blocks;
@@ -746,6 +747,7 @@ int cuda_get_deviceinfo(nvid_ctx *ctx)
                 ctx->device_blocks = b;
             }
         }
+#       endif
 
         ctx->device_threads = std::min(ctx->device_threads, (props.major == 2 ? 64 : 128));
     }
