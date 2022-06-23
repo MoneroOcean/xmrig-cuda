@@ -8,7 +8,7 @@ name: Create release and build artifacts
 jobs:
   build_win_cuda11_3:
     name: Windows CUDA 11.3
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout code
         uses: actions/checkout@master
@@ -33,7 +33,7 @@ jobs:
 
   build_win_cuda11_0:
     name: Windows CUDA 11.0
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout code
         uses: actions/checkout@master
@@ -58,7 +58,7 @@ jobs:
 
   build_win_cuda10_2:
     name: Windows CUDA 10.2
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout code
         uses: actions/checkout@master
@@ -83,7 +83,7 @@ jobs:
 
   build_win_cuda10_1:
     name: Windows CUDA 10.1
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout code
         uses: actions/checkout@master
