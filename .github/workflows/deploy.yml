@@ -177,7 +177,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: cuda11_4/cuda11_4.zip
+          asset_path: cuda11_4.zip
           asset_name: xmrig-cuda-${{steps.version.outputs.VERSION}}-cuda11_4-win64.zip
           asset_content_type: application/zip
 
@@ -187,7 +187,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: cuda11_3/cuda11_3.zip
+          asset_path: cuda11_3.zip
           asset_name: xmrig-cuda-${{steps.version.outputs.VERSION}}-cuda11_3-win64.zip
           asset_content_type: application/zip
 
@@ -197,7 +197,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: cuda11_0/cuda11_0.zip
+          asset_path: cuda11_0.zip
           asset_name: xmrig-cuda-${{steps.version.outputs.VERSION}}-cuda11_0-win64.zip
           asset_content_type: application/zip
 
@@ -207,7 +207,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: cuda10_2/cuda10_2.zip
+          asset_path: cuda10_2.zip
           asset_name: xmrig-cuda-${{steps.version.outputs.VERSION}}-cuda10_2-win64.zip
           asset_content_type: application/zip
 
@@ -217,6 +217,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: cuda10_1/cuda10_1.zip
+          asset_path: cuda10_1.zip
           asset_name: xmrig-cuda-${{steps.version.outputs.VERSION}}-cuda10_1-win64.zip
           asset_content_type: application/zip
